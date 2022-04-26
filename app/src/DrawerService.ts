@@ -45,7 +45,6 @@ export default class DrawerService {
     this.screenWidth = this.app.screen.width;
     this.screenHeight = this.app.screen.height;
 
-    this.app.stage.sortableChildren = true;
     this.app.stage.interactive = true;
     this.app.stage.hitArea = new PIXI.Rectangle(0, 0, this.screenWidth, this.screenHeight);
     
@@ -114,7 +113,8 @@ export default class DrawerService {
 
   private createDrawLayer(position: PIXI.Point): void {
     if (this.drawContainer) {
-      this.app.stage.sortChildren();
+      this.app.stage.children.shift();
+      this.app.stage.children.push(this.drawContainer);
     } else {
       this.drawContainer = new PIXI.Container();
       this.drawContainer.width = this.screenWidth;

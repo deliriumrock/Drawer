@@ -1,3 +1,4 @@
 /node_modules/
 /.idea/*.*
 /.idea/codeStyles/codeStyleConfig.xml
+package-lock.json

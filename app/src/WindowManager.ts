@@ -59,7 +59,6 @@ export default class WindowManager {
     this.windowContainer.addChild(buttonClose);
 
     this.application.stage.addChild(this.windowContainer);
-    this.application.stage.sortChildren();
 
     return this.windowContainer;
   }
