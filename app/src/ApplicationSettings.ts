@@ -13,6 +13,10 @@ export default class ApplicationSettings {
   public static readonly TOOL_BRUSH_WIDTH: number = 87;
   public static readonly TOOL_BRUSH_HEIGHT: number = 64;
 
+  public static readonly SLIDER_LINE_WIDTH: number = 224; // 200 + SLIDER_WIDTH
+  public static readonly SLIDER_WIDTH: number = 24;
+  public static readonly SLIDER_HEIGHT: number = 28;
+
   public static readonly PAINT_COLORS: number[] = [
     0xFF0000,   // red
     0xFFFF00,   // yellow

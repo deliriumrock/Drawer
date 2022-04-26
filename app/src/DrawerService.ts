@@ -8,6 +8,7 @@ export default class DrawerService {
   public resources: any;
   public activeColor: number = 0;
   public activeBrush: number = 0;
+  public activeBrushAlfa: number = 1;
 
   public screenWidth: number;
   public screenHeight: number;
@@ -24,7 +25,7 @@ export default class DrawerService {
 
   private drawContainer: PIXI.Container;
   private paintSprite: PIXI.Sprite;
-  private paintTexture: PIXI.Texture;
+
   private isDraw: boolean = false;
 
   constructor() {

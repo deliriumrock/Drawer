@@ -166,12 +166,13 @@ export default class BaseTool {
       let brushName: string = `brush${this.activeElement}`;
 
       this.paintSprite = new PIXI.Sprite(this.drawService.resources[brushName].texture);
+      this.paintSprite.alpha = this.drawService.activeBrushAlfa;
       this.paintSprite.width = ApplicationSettings.TOOL_BRUSH_WIDTH;
       this.paintSprite.height = ApplicationSettings.TOOL_BRUSH_HEIGHT;
       this.paintSprite.tint = ApplicationSettings.PAINT_COLORS[this.drawService.activeColor];
     } else {
       let pencil: PIXI.Graphics = new PIXI.Graphics();
-      pencil.beginFill(ApplicationSettings.PAINT_COLORS[this.activeElement]);
+      pencil.beginFill(ApplicationSettings.PAINT_COLORS[this.activeElement], 1);
       pencil.drawCircle(0, 0, ApplicationSettings.TOOL_PENCIL_SIZE);
       pencil.endFill();
 
