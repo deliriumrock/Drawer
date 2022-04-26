@@ -20,6 +20,8 @@ export default class BaseTool {
   protected activeFrameTexture: PIXI.Texture;
   protected inactiveFrameTexture: PIXI.Texture;
 
+  protected frameSelectedSprite: PIXI.Sprite;
+
   public paintSprite: PIXI.Sprite;
 
   protected isActive: boolean = false;
@@ -50,8 +52,8 @@ export default class BaseTool {
   }
 
   public setToolBackgroundColor(colorIndex?: number, sprite?: PIXI.Sprite) {
-    sprite = sprite || this.backgroundSprite
-    sprite.tint = ApplicationSettings.PAINT_COLORS[colorIndex? ApplicationSettings.PAINT_COLORS[colorIndex] : 0];
+    sprite = sprite || this.backgroundSprite;
+    sprite.tint = ApplicationSettings.PAINT_COLORS[colorIndex || 0];
   }
 
   protected createInactiveFrameTexture(): void {
@@ -99,16 +101,18 @@ export default class BaseTool {
     this.iconSprite.on("pointerdown", this.changeToolsState, this);
   }
 
-  protected addSpritesToStage(): void {
+  protected addSpritesToStage(isEraser?: boolean): void {
     this.stage.addChild(this.backgroundSprite);
     this.stage.addChild(this.frameSprite);
     this.stage.addChild(this.iconSprite);
 
     BaseTool.toolsFrameSet.add(this.frameSprite);
-    BaseTool.toolsBackgroundSet.add(this.backgroundSprite);
+    !isEraser && BaseTool.toolsBackgroundSet.add(this.backgroundSprite);
   }
 
   protected changeToolsState(event?: any): void {
+    event && event.stopPropagation();
+
     BaseTool.toolsFrameSet.forEach((sprite) => {
       this.setInactiveState(sprite);
     });
@@ -116,47 +120,64 @@ export default class BaseTool {
     this.toggleActiveState();
   }
 
-  protected changeToolsBackground(event?: any): void {
+  protected changeToolsBackground(): void {
     BaseTool.toolsBackgroundSet.forEach((sprite) => {
       this.setToolBackgroundColor(this.activeElement, sprite);
     });
-
-    this.toggleActiveState();
   }
 
   protected setActiveElement(index: number): void {
     this.activeElement = index;
   }
 
+  protected createFrameSelectedSprite(stage: PIXI.Container, isBrush: boolean = false): void {
+    let frame = new PIXI.Graphics();
+    frame.lineStyle(3, ApplicationSettings.TOOL_ACTIVE_FRAME_COLOR, 1, 1);
+    frame.beginFill(0, 0);
+
+    if (isBrush) {
+      frame.drawRect(0, 0, ApplicationSettings.TOOL_BRUSH_WIDTH, ApplicationSettings.TOOL_BRUSH_HEIGHT);
+    } else {
+      frame.drawCircle(0, 0, ApplicationSettings.TOOL_PENCIL_SIZE);
+    }
+
+    frame.endFill();
+
+    let texture: PIXI.Texture = this.drawService.app.renderer.generateTexture(frame, PIXI.SCALE_MODES.LINEAR, 1);
+
+    this.frameSelectedSprite = new PIXI.Sprite(texture);
+    this.frameSelectedSprite.anchor.set(0.5);
+    this.frameSelectedSprite.position.set(-100, -100);
+
+    stage.addChild(this.frameSelectedSprite);
+  }
+
+  protected selectElement(event: any): void {
+    event.stopPropagation();
+    this.setActiveElement(+event.currentTarget.name);
+    this.frameSelectedSprite.position.set(event.currentTarget.position.x, event.currentTarget.position.y);
+    // this.windowManager.closeWindow();
+  }
+
   protected createPaintSprite(position: PIXI.Point, isBrush: boolean = false, isEraser: boolean = false): PIXI.Sprite {
     let paintTexture: PIXI.Texture;
 
-    if (!isBrush) {
+    if (isBrush) {
+      let brushName: string = `brush${this.activeElement}`;
+
+      this.paintSprite = new PIXI.Sprite(this.drawService.resources[brushName].texture);
+      this.paintSprite.width = ApplicationSettings.TOOL_BRUSH_WIDTH;
+      this.paintSprite.height = ApplicationSettings.TOOL_BRUSH_HEIGHT;
+      this.paintSprite.tint = ApplicationSettings.PAINT_COLORS[this.drawService.activeColor];
+    } else {
       let pencil: PIXI.Graphics = new PIXI.Graphics();
-      pencil.beginFill(isEraser ? 0xFFFFFF : ApplicationSettings.PAINT_COLORS[this.activeElement]);
-      isEraser ? pencil.drawRect(0, 0, 60, 60) : pencil.drawCircle(0, 0, 30);
+      pencil.beginFill(ApplicationSettings.PAINT_COLORS[this.activeElement]);
+      pencil.drawCircle(0, 0, ApplicationSettings.TOOL_PENCIL_SIZE);
       pencil.endFill();
 
       paintTexture = this.drawService.app.renderer.generateTexture(pencil, PIXI.SCALE_MODES.LINEAR, 1);
-      this.paintSprite = new PIXI.Sprite(paintTexture);
-    } else {
-      let brushColor: any = new PIXI.filters.ColorMatrixFilter();
-      let brushName: string = 'brush' + this.activeElement;
 
-      const tint: number = ApplicationSettings.PAINT_COLORS[this.activeElement];
-      const r: number = tint >> 16 & 0xFF;
-      const g: number = tint >> 8 & 0xFF;
-      const b: number = tint & 0xFF;
-
-      brushColor.matrix[0] = r / 255;
-      brushColor.matrix[6] = g / 255;
-      brushColor.matrix[12] = b / 255;
-
-      // this.paintSprite = PIXI.Sprite.from('assets/brushes/brush0.png');
-      this.paintSprite = new PIXI.Sprite(this.drawService.resources['brush6'].texture);
-      this.paintSprite.width = 87;
-      this.paintSprite.height = 64;
-      this.paintSprite.filters = [brushColor];
+      this.paintSprite = new PIXI.Sprite(isEraser ? this.drawService.resources.eraserBrush.texture : paintTexture);
     }
 
     this.paintSprite.anchor.set(0.5);

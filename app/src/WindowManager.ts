@@ -45,17 +45,26 @@ export default class WindowManager {
     buttonClose.on("pointerdown", this.closeWindow.bind(this));
 
     this.windowContainer = new PIXI.Container();
+    this.windowContainer.width = this.application.screen.width;
+    this.windowContainer.height = this.application.screen.height;
+    this.windowContainer.position.set(0, 0);
+    this.windowContainer.hitArea = new PIXI.Rectangle(0, 0, this.application.screen.width, this.application.screen.height);
+    this.windowContainer.zIndex = 2;
+    this.windowContainer.interactive = true;
+
+    this.windowContainer.on("pointerdown", this.closeWindow.bind(this));
+
     this.windowContainer.addChild(window);
     this.windowContainer.addChild(windowTitle);
     this.windowContainer.addChild(buttonClose);
 
     this.application.stage.addChild(this.windowContainer);
+    this.application.stage.sortChildren();
 
     return this.windowContainer;
   }
 
   public closeWindow(event?: any): void {
-    console.log('hideWindow | event = ', event);
     if (event) {
       event.stopPropagation();
     }

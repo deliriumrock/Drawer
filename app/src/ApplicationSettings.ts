@@ -1,4 +1,6 @@
 export default class ApplicationSettings {
+  public static readonly APP_WIDTH: number = 800;
+  public static readonly APP_HEIGHT: number = 600;
   public static readonly WINDOW_FRAME_COLOR: number = 0xC4C4C4;
   public static readonly WINDOW_BACKGROUND_COLOR: number = 0xFAFAFA;
   public static readonly WINDOW_TITLE_COLOR: string = '#313131';
@@ -6,6 +8,10 @@ export default class ApplicationSettings {
   public static readonly TOOL_ACTIVE_FRAME_COLOR: number = 0xa200ff;
 
   public static readonly TOOL_FRAME_SIZE: number = 96;
+
+  public static readonly TOOL_PENCIL_SIZE: number = 30;
+  public static readonly TOOL_BRUSH_WIDTH: number = 87;
+  public static readonly TOOL_BRUSH_HEIGHT: number = 64;
 
   public static readonly PAINT_COLORS: number[] = [
     0xFF0000,   // red
@@ -61,8 +67,8 @@ export default class ApplicationSettings {
       url: '/assets/brushes/brush5.png'
     },
     {
-      name: 'brush6',
-      url: '/assets/brushes/brush6.png'
+      name: 'eraserBrush',
+      url: '/assets/brushes/eraser_brush.png'
     }
   ];
 }

@@ -22,12 +22,11 @@ export default class EraserTool extends BaseTool {
     this.createFrameSprite();
     this.createIconSprite(this.drawService.resources.iconEraserTool.texture);
 
-    this.addSpritesToStage();
+    this.addSpritesToStage(true);
   }
 
   protected changeToolsState(event: any): void {
-    event.stopPropagation();
-    super.changeToolsState();
+    super.changeToolsState(event);
     this.drawService.setActiveTool(this);
   }
 }

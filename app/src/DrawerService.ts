@@ -9,6 +9,9 @@ export default class DrawerService {
   public activeColor: number = 0;
   public activeBrush: number = 0;
 
+  public screenWidth: number;
+  public screenHeight: number;
+
   private readonly application: PIXI.Application;
 
   private brushesTool: BrushTool;
@@ -28,17 +31,22 @@ export default class DrawerService {
     this.loaderAnimation = document.getElementById('spinner-pacman');
     this.startLoaderAnimation();
 
+    PIXI.settings.ROUND_PIXELS = true;
+
     this.application = new PIXI.Application({
       view: <HTMLCanvasElement>document.getElementById('view'),
-      width: 800,
-      height: 600,
+      width: ApplicationSettings.APP_WIDTH,
+      height: ApplicationSettings.APP_HEIGHT,
       backgroundColor: 0xFFFFFF,
       resolution: window.devicePixelRatio || 1
     });
 
+    this.screenWidth = this.app.screen.width;
+    this.screenHeight = this.app.screen.height;
+
     this.app.stage.sortableChildren = true;
     this.app.stage.interactive = true;
-    this.app.stage.hitArea = new PIXI.Rectangle(0, 0, this.app.screen.width, this.app.screen.height);
+    this.app.stage.hitArea = new PIXI.Rectangle(0, 0, this.screenWidth, this.screenHeight);
     
     this.app.stage.on('pointerdown', this.startDrawPaint.bind(this));
     this.app.stage.on('pointermove', this.drawPaint.bind(this));
@@ -89,19 +97,18 @@ export default class DrawerService {
   private drawPaint(event: any): void {
     if (!this.isDraw) return;
 
-    let paintSprite = new PIXI.Sprite(this.paintSprite.texture);
-    paintSprite.anchor.set(0.5);
-    paintSprite.position = event.data.global;
+    let paintSprite = this.activeTool.getPaintSprite(event.data.global);
 
-    this.drawContainer.addChild( paintSprite);
+    this.drawContainer.addChild(paintSprite);
   }
 
   private stopDrawPaint(event: any): void {
-    if (this.isDraw) {
-      this.rasterisation();
-    }
+    if (!this.isDraw) return;
 
     this.isDraw = false;
+
+    this.drawContainer.removeChildren(this.drawContainer.children.length - 1);
+    this.rasterisation();
   }
 
   private createDrawLayer(position: PIXI.Point): void {
@@ -109,35 +116,35 @@ export default class DrawerService {
       this.app.stage.sortChildren();
     } else {
       this.drawContainer = new PIXI.Container();
-      this.drawContainer.width = this.app.screen.width;
-      this.drawContainer.height = this.app.screen.height;
+      this.drawContainer.width = this.screenWidth;
+      this.drawContainer.height = this.screenHeight;
       this.drawContainer.x = 0;
       this.drawContainer.y = 0;
       this.drawContainer.zIndex = 1;
+
+      this.app.stage.addChild(this.drawContainer);
     }
 
     this.paintSprite = this.activeTool.getPaintSprite(position);
 
     this.drawContainer.addChild(this.paintSprite);
-    this.app.stage.addChild(this.drawContainer);
   }
 
   private rasterisation(): void {
     let texture: PIXI.Texture = this.app.renderer.generateTexture(this.drawContainer,
-                                                                  PIXI.SCALE_MODES.LINEAR,
+                                                                  PIXI.SCALE_MODES.NEAREST,
                                                          1,
                                                                   new PIXI.Rectangle(0,
                                                                                      0,
-                                                                                        this.app.screen.width,
-                                                                                        this.app.screen.height));
+                                                                                        this.screenWidth,
+                                                                                        this.screenHeight));
     let sprite = new PIXI.Sprite(texture);
-
     sprite.anchor.set(0.5);
-    sprite.x = this.app.screen.width / 2;
-    sprite.y = this.app.screen.height / 2;
+    sprite.x = this.screenWidth / 2;
+    sprite.y = this.screenHeight / 2;
 
-    this.drawContainer.removeChildren();
     this.drawContainer.addChild(sprite);
+    this.drawContainer.children.length > 2 && this.drawContainer.removeChildren(0, this.drawContainer.children.length - 2);
 
     this.app.stage.children.pop();
     this.app.stage.children.unshift(this.drawContainer);
