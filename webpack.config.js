@@ -11,7 +11,7 @@ const stylesHandler = isProduction
   : "style-loader";
 
 const config = {
-  entry: "./src/index.ts",
+  entry: "./src/main.ts",
   devtool: 'inline-source-map',
   context: path.resolve(__dirname, 'app'),
   output: {

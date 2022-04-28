@@ -10,6 +10,6 @@
     "allowJs": true
   },
   "files": [
-    "app/src/index.ts"
+    "app/src/main.ts"
   ]
 }
