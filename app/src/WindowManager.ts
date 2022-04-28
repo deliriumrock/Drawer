@@ -23,6 +23,11 @@ export default class WindowManager {
     let window = new PIXI.Sprite(texture);
     window.anchor.set(0.5);
     window.position.set(x, y);
+    window.interactive = true;
+
+    window.on('pointerdown', (event: any): void => {
+      event.stopPropagation();
+    });
 
     const fontStyle = new PIXI.TextStyle({
       fill: ApplicationSettings.WINDOW_TITLE_COLOR,

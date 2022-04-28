@@ -5,8 +5,9 @@ import ApplicationSettings from "./ApplicationSettings";
 
 export default class BrushTool extends BaseTool {
   private isSlide: boolean = false;
-  private sliderGlobalStarX: number;
-  private sliderGlobalEndX: number;
+  private sliderStartX: number;
+  private sliderEndX: number;
+  private sliderSelectedX: number;
   private brushPreviewSprites: Array<PIXI.Sprite> = [];
 
   constructor(protected drawService: DrawerService, protected x: number, protected y: number, isActive?: boolean) {
@@ -34,7 +35,7 @@ export default class BrushTool extends BaseTool {
     this.createToolsWindow();
   }
 
-  protected setActiveElement(index: number) {
+  protected setActiveElement(index: number): void {
     super.setActiveElement(index);
     this.drawService.activeBrush = index;
   }
@@ -55,7 +56,7 @@ export default class BrushTool extends BaseTool {
 
     this.createFrameSelectedSprite(this.toolsWindowContainer, true);
 
-    for (let i = 0; i < ApplicationSettings.PAINT_COLORS.length; i++) {
+    for (let i: number = 0; i < ApplicationSettings.PAINT_COLORS.length; i++) {
       let x: number = this.drawService.screenWidth / 2 + arrColorsPosition[i].x;
       let y: number = this.drawService.screenHeight / 2 + arrColorsPosition[i].y;
       let brushName: string = `brush${i}`;
@@ -82,41 +83,27 @@ export default class BrushTool extends BaseTool {
   }
 
   private createSlider(container: PIXI.Container): void {
+    this.sliderSelectedX = (ApplicationSettings.SLIDER_LINE_WIDTH - ApplicationSettings.SLIDER_WIDTH) * (1 - this.drawService.activeBrushAlfa);
+    this.sliderStartX = (this.drawService.screenWidth / 2 - ApplicationSettings.SLIDER_LINE_WIDTH / 2);
+    this.sliderEndX = this.drawService.screenWidth / 2 + ApplicationSettings.SLIDER_LINE_WIDTH / 2;
+
     let sliderLine: PIXI.Graphics = new PIXI.Graphics();
     sliderLine.lineStyle(4, ApplicationSettings.WINDOW_FRAME_COLOR, 1, 1);
     sliderLine.beginFill(0, 0);
-    sliderLine.moveTo(
-      this.drawService.screenWidth / 2 - ApplicationSettings.SLIDER_LINE_WIDTH / 2,
-      this.drawService.screenHeight / 2 + 120);
-    sliderLine.lineTo(
-      this.drawService.screenWidth / 2 + ApplicationSettings.SLIDER_LINE_WIDTH / 2,
-      this.drawService.screenHeight / 2 + 120);
+    sliderLine.moveTo(this.sliderStartX, this.drawService.screenHeight / 2 + 120);
+    sliderLine.lineTo(this.sliderEndX, this.drawService.screenHeight / 2 + 120);
     sliderLine.endFill();
 
-    container.addChild(sliderLine);
-
-    let slider: PIXI.Graphics = new PIXI.Graphics();
-    slider.beginFill(ApplicationSettings.TOOL_FRAME_COLOR, 1);
-    slider.drawRect(
-      this.drawService.screenWidth / 2 - ApplicationSettings.SLIDER_LINE_WIDTH / 2,
-      this.drawService.screenHeight / 2 + 104,
-      ApplicationSettings.SLIDER_WIDTH,
-      ApplicationSettings.SLIDER_HEIGHT);
-    slider.endFill();
-
-    this.sliderGlobalStarX = this.drawService.screenWidth / 2 - ApplicationSettings.SLIDER_LINE_WIDTH / 2;
-    this.sliderGlobalEndX = this.drawService.screenWidth / 2
-                            + (ApplicationSettings.SLIDER_LINE_WIDTH / 2 - ApplicationSettings.SLIDER_WIDTH)
-                            - this.sliderGlobalStarX;
-
-    slider.name = "slider";
+    let slider: PIXI.Sprite = new PIXI.Sprite(this.drawService.resources.slider.texture);
+    slider.anchor.set(0.5);
+    slider.position.set(this.sliderStartX + this.sliderSelectedX, this.drawService.screenHeight / 2 + 118);
     slider.interactive = true;
     slider.buttonMode = true;
     slider.on('pointerdown', this.sliderStart, this);
     slider.on('pointermove', this.sliderMove, this);
     slider.on('pointerup', this.sliderStop, this);
 
-    container.addChild(slider);
+    container.addChild(sliderLine, slider);
   }
 
   private sliderStart(event: any): void {
@@ -130,16 +117,17 @@ export default class BrushTool extends BaseTool {
 
     if (!this.isSlide) return;
 
-    event.currentTarget.x = event.data.global.x - this.sliderGlobalStarX;
-    this.drawService.activeBrushAlfa = 1 - (event.data.global.x - this.sliderGlobalStarX) / 200;
+    event.currentTarget.x = event.data.global.x;
+    this.sliderSelectedX = event.data.global.x - (this.drawService.screenWidth / 2 - ApplicationSettings.SLIDER_LINE_WIDTH / 2);
+    this.drawService.activeBrushAlfa = 1 - this.sliderSelectedX / ApplicationSettings.SLIDER_LINE_WIDTH;
 
-    if ((event.data.global.x - this.sliderGlobalStarX) <= 0) {
-      event.currentTarget.x = 0;
+    if (event.currentTarget.x <= this.sliderStartX) {
+      event.currentTarget.x = this.sliderStartX;
       this.drawService.activeBrushAlfa = 1;
     }
 
-    if ((event.data.global.x - this.sliderGlobalStarX) >= this.sliderGlobalEndX) {
-      event.currentTarget.x = this.sliderGlobalEndX;
+    if (event.currentTarget.x >= this.sliderEndX) {
+      event.currentTarget.x = this.sliderEndX;
       this.drawService.activeBrushAlfa = 0;
     }
 

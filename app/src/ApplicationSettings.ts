@@ -2,10 +2,10 @@ export default class ApplicationSettings {
   public static readonly APP_WIDTH: number = 800;
   public static readonly APP_HEIGHT: number = 600;
   public static readonly WINDOW_FRAME_COLOR: number = 0xC4C4C4;
-  public static readonly WINDOW_BACKGROUND_COLOR: number = 0xFAFAFA;
+  public static readonly WINDOW_BACKGROUND_COLOR: number = 0xf8f8f8;
   public static readonly WINDOW_TITLE_COLOR: string = '#313131';
   public static readonly TOOL_FRAME_COLOR: number = 0x313131;
-  public static readonly TOOL_ACTIVE_FRAME_COLOR: number = 0xa200ff;
+  public static readonly TOOL_ACTIVE_FRAME_COLOR: number = 0xff8a00;
 
   public static readonly TOOL_FRAME_SIZE: number = 96;
 
@@ -13,8 +13,8 @@ export default class ApplicationSettings {
   public static readonly TOOL_BRUSH_WIDTH: number = 87;
   public static readonly TOOL_BRUSH_HEIGHT: number = 64;
 
-  public static readonly SLIDER_LINE_WIDTH: number = 224; // 200 + SLIDER_WIDTH
-  public static readonly SLIDER_WIDTH: number = 24;
+  public static readonly SLIDER_LINE_WIDTH: number = 200;
+  public static readonly SLIDER_WIDTH: number = 16;
   public static readonly SLIDER_HEIGHT: number = 28;
 
   public static readonly PAINT_COLORS: number[] = [
@@ -30,6 +30,10 @@ export default class ApplicationSettings {
     {
       name: 'buttonClose',
       url: '/assets/btn_close_window.png'
+    },
+    {
+      name: 'slider',
+      url: '/assets/slider.png'
     },
     {
       name: 'iconBrushTool',
