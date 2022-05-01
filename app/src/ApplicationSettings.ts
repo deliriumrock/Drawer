@@ -15,7 +15,8 @@ export default class ApplicationSettings {
 
   public static readonly SLIDER_LINE_WIDTH: number = 200;
   public static readonly SLIDER_WIDTH: number = 16;
-  public static readonly SLIDER_HEIGHT: number = 28;
+
+  public static readonly FILE_NAME: string = 'my_masterpiece';
 
   public static readonly PAINT_COLORS: number[] = [
     0xFF0000,   // red

@@ -1,7 +1,5 @@
 import * as PIXI from 'pixi.js';
-import WindowManager from "./WindowManager";
 import DrawerService from "./DrawerService";
-import ApplicationSettings from "./ApplicationSettings";
 import BaseTool from "./BaseTool";
 
 export default class EraserTool extends BaseTool {

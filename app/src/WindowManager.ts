@@ -47,7 +47,7 @@ export default class WindowManager {
     buttonClose.interactive = true;
     buttonClose.buttonMode = true;
 
-    buttonClose.on("pointerdown", this.closeWindow.bind(this));
+    buttonClose.on("pointerdown", this.closeWindow, this);
 
     this.windowContainer = new PIXI.Container();
     this.windowContainer.width = this.application.screen.width;
@@ -57,7 +57,7 @@ export default class WindowManager {
     this.windowContainer.zIndex = 2;
     this.windowContainer.interactive = true;
 
-    this.windowContainer.on("pointerdown", this.closeWindow.bind(this));
+    this.windowContainer.on("pointerdown", this.closeWindow, this);
 
     this.windowContainer.addChild(window);
     this.windowContainer.addChild(windowTitle);

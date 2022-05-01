@@ -29,7 +29,6 @@ export default class DrawerService {
   private isDraw: boolean = false;
 
   constructor() {
-    this.loaderAnimation = document.getElementById('spinner-pacman');
     this.startLoaderAnimation();
 
     PIXI.settings.ROUND_PIXELS = true;
@@ -48,11 +47,11 @@ export default class DrawerService {
     this.app.stage.interactive = true;
     this.app.stage.hitArea = new PIXI.Rectangle(0, 0, this.screenWidth, this.screenHeight);
     
-    this.app.stage.on('pointerdown', this.startDrawPaint.bind(this));
-    this.app.stage.on('pointermove', this.drawPaint.bind(this));
-    this.app.stage.on('pointerup', this.stopDrawPaint.bind(this));
-    this.app.stage.on('pointerupoutside', this.stopDrawPaint.bind(this))
-    this.app.stage.on('pointerout',  this.stopDrawPaint.bind(this));
+    this.app.stage.on('pointerdown', this.startDrawPaint, this);
+    this.app.stage.on('pointermove', this.drawPaint, this);
+    this.app.stage.on('pointerup', this.stopDrawPaint, this);
+    this.app.stage.on('pointerupoutside', this.stopDrawPaint, this)
+    this.app.stage.on('pointerout',  this.stopDrawPaint, this);
 
     this.app.loader.add(ApplicationSettings.APP_TEXTURES);
     this.app.loader.add(ApplicationSettings.APP_BRUSHES);
@@ -62,13 +61,14 @@ export default class DrawerService {
   init(loader: PIXI.Loader, resources: any): void {
     this.resources = resources;
 
-    this.stopLoaderAnimation();
+    document.getElementById('title').addEventListener('click', this.saveToDisk.bind(this));
 
     this.pencilTool = new PencilTool(this, 736, 62, true);
     this.brushesTool = new BrushTool(this, 736, 173);
     this.eraserTool = new EraserTool(this, 736, 284);
 
     this.setActiveTool(this.pencilTool);
+    this.stopLoaderAnimation();
   }
 
   get app(): PIXI.Application {
@@ -80,6 +80,10 @@ export default class DrawerService {
   }
 
   private startLoaderAnimation(): void {
+    if (!this.loaderAnimation) {
+      this.loaderAnimation = document.getElementById('spinner-pacman');
+    }
+
     this.loaderAnimation.classList.remove("fade-out");
     this.loaderAnimation.classList.add("fade-in");
   }
@@ -149,5 +153,26 @@ export default class DrawerService {
 
     this.app.stage.children.pop();
     this.app.stage.children.unshift(this.drawContainer);
+  }
+
+  private saveToDisk(): void {
+    if (!this.drawContainer) return;
+
+    let whiteBackground: PIXI.Sprite = new PIXI.Sprite(PIXI.Texture.WHITE);
+    whiteBackground.width = this.screenWidth;
+    whiteBackground.height = this.screenHeight;
+    whiteBackground.position.set(0, 0);
+    this.drawContainer.addChildAt(whiteBackground, 0);
+
+    this.app.renderer.plugins.extract.canvas(this.drawContainer).toBlob((blob: Blob) => {
+      let aElement: HTMLAnchorElement = document.createElement("a");
+
+      document.body.append(aElement);
+      aElement.download = ApplicationSettings.FILE_NAME;
+      aElement.href = URL.createObjectURL(blob);
+      aElement.click();
+      aElement.remove();
+      this.drawContainer.removeChild(whiteBackground);
+    }, "image/png");
   }
 }
